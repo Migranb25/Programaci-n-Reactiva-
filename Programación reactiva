@@ -1,0 +1,25 @@
+!pip install rx
+from rx import from_, operators as op
+import random
+import time
+def generar_mensaje():
+    usuarios = ["Sofi", "Mile", "Andrés", "Paula", "Martín"]
+    mensajes = [
+        "¡Hola! ¿Qué tal?",
+        "Muy bien gracias",
+        "Voy algo tarde",
+        "¿revisaste el clima de hoy?",
+        "Parece que va a llover" ]
+    return {
+        "usuario": random.choice(usuarios),
+        "mensaje": random.choice(mensajes),
+        "hora": time.strftime("%H:%M:%S")}
+flujo_mensajes = from_([generar_mensaje() for _ in range(7)])  
+flujo_procesado = flujo_mensajes.pipe(
+    op.filter(lambda msg: msg["usuario"] != "Sofi"),
+    op.map(lambda msg: {**msg, "mensaje": msg["mensaje"].upper()}),
+    op.map(lambda msg: {**msg, "leído": False}))
+flujo_procesado.subscribe(
+    on_next=lambda msg: print(f"📩 [{msg['hora']}] {msg['usuario']}: {msg['mensaje']}"),
+    on_error=lambda err: print(f"🚨 Error: {err}"),
+    on_completed=lambda: print("✅ Todos los mensajes procesados"))
