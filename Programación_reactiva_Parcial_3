@@ -1,0 +1,94 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNX8EAnqWrpZJcs1UtrnuFQ",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Migranb25/Programaci-n-Reactiva-/blob/main/Programaci%C3%B3n_reactiva_Parcial_3\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 39,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "FK2b_1YwQZIq",
+        "outputId": "ac8af100-025c-49c4-ee7c-45e0e8454a32"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: rx in /usr/local/lib/python3.11/dist-packages (3.2.0)\n",
+            "📩 [19:37:49] Mile: ¡HOLA! ¿QUÉ TAL?\n",
+            "📩 [19:37:49] Andrés: MUY BIEN GRACIAS\n",
+            "📩 [19:37:49] Martín: ¡HOLA! ¿QUÉ TAL?\n",
+            "📩 [19:37:49] Paula: VOY ALGO TARDE\n",
+            "📩 [19:37:49] Mile: PARECE QUE VA A LLOVER\n",
+            "📩 [19:37:49] Mile: ¿REVISASTE EL CLIMA DE HOY?\n",
+            "✅ Todos los mensajes procesados\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<rx.disposable.disposable.Disposable at 0x7a03249aca10>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 39
+        }
+      ],
+      "source": [
+        "!pip install rx\n",
+        "from rx import from_, operators as op\n",
+        "import random\n",
+        "import time\n",
+        "def generar_mensaje():\n",
+        "    usuarios = [\"Sofi\", \"Mile\", \"Andrés\", \"Paula\", \"Martín\"]\n",
+        "    mensajes = [\n",
+        "        \"¡Hola! ¿Qué tal?\",\n",
+        "        \"Muy bien gracias\",\n",
+        "        \"Voy algo tarde\",\n",
+        "        \"¿revisaste el clima de hoy?\",\n",
+        "        \"Parece que va a llover\" ]\n",
+        "    return {\n",
+        "        \"usuario\": random.choice(usuarios),\n",
+        "        \"mensaje\": random.choice(mensajes),\n",
+        "        \"hora\": time.strftime(\"%H:%M:%S\")}\n",
+        "flujo_mensajes = from_([generar_mensaje() for _ in range(7)])\n",
+        "flujo_procesado = flujo_mensajes.pipe(\n",
+        "    op.filter(lambda msg: msg[\"usuario\"] != \"Sofi\"),\n",
+        "    op.map(lambda msg: {**msg, \"mensaje\": msg[\"mensaje\"].upper()}),\n",
+        "    op.map(lambda msg: {**msg, \"leído\": False}))\n",
+        "flujo_procesado.subscribe(\n",
+        "    on_next=lambda msg: print(f\"📩 [{msg['hora']}] {msg['usuario']}: {msg['mensaje']}\"),\n",
+        "    on_error=lambda err: print(f\"🚨 Error: {err}\"),\n",
+        "    on_completed=lambda: print(\"✅ Todos los mensajes procesados\"))"
+      ]
+    }
+  ]
+}
